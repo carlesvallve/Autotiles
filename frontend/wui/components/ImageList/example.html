@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../events/EventEmitter.js"></script>
+	<script src="../../core/script.js"></script>
+	<script src="../../core/Dom/script.js"></script>
+	<script src="../Image/script.js"></script>
+	<script src="./script.js"></script>
+</head>
+<body>
+
+<h1>Example: ImageList component</h1>
+
+<button id="btnPreloadShow">Preload and show</button>
+<button id="btnShow">Just show</button>
+<input type="checkbox" id="broken"> Force error
+
+<div id="workspace"></div>
+
+<script type="text/javascript">
+
+(function () {
+	var workspace = document.getElementById('workspace');
+	var url = 'http://ourearth.ou.edu/wp-content/themes/gear/images/ico.big/earth.png';
+	var imgList;
+	var imgCount = 20;
+
+	function getUrl() {
+		if (document.getElementById('broken').checked) {
+			return 'http://www.example.com/foobar';
+		}
+
+		return url + '?' + Math.random();
+	}
+
+	document.getElementById('btnPreloadShow').onclick = function () {
+		if (imgList) {
+			imgList.destroy();
+		}
+
+		imgList = new window.wui.components.ImageList();
+
+		for (var i = 0; i < imgCount; i++) {
+			imgList.appendChild(new window.wui.components.Image(getUrl()));
+		}
+
+		imgList.load(function (errors, loaded) {
+			if (errors) {
+				window.alert('Error loading ' + errors.length + ' images');
+			}
+
+			loaded.forEach(function (img) {
+				workspace.appendChild(img.rootElement);
+			});
+		});
+	};
+
+	document.getElementById('btnShow').onclick = function () {
+		if (imgList) {
+			imgList.destroy();
+		}
+
+		imgList = new window.wui.components.ImageList();
+
+		for (var i = 0; i < imgCount; i++) {
+			imgList.appendChild(new window.wui.components.Image(getUrl()));
+		}
+
+		var images = imgList.load();
+
+		images.forEach(function (img) {
+			workspace.appendChild(img.rootElement);
+		});
+	};
+}());
+
+</script>
+
+</body>
+</html>

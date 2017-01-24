@@ -1,27 +1,63 @@
 (function () {
 
 	function Canvas(canvas) {
+		EventEmitter.call(this);
 		this._frameUpdater = null;
 		this._minFrameRate = 1;
-		this._frameRate = 100; // milliseconds
+		this._framePerSecond = 0;
+		this._frameRate = 100;
 		this._canvas = canvas || document.createElement('canvas');
 		this._size = {
 			w: 100,
 			h: 100
 		};
+		this._rootSprite = null;
 	}
 
-	Canvas.prototype = new EventEmitter();
+	window.wuic.core.inherits(Canvas, EventEmitter);
 	window.wuic.core.Canvas = Canvas;
+
+	Canvas.prototype.setFrameRate = function (framePerSecond) {
+		this._framePerSecond = framePerSecond;
+		this._frameRate = Math.max(this._minFrameRate, Math.floor(1000 / framePerSecond));
+		if (!this._frameUpdater) {
+			var lastUpdate = Date.now();
+			var that = this;
+			this._frameUpdater = window.setInterval(function () {
+				var now = Date.now();
+				var updateInterval = now - lastUpdate;
+				if (updateInterval >= that._frameRate) {
+					var currentFps = Math.floor(1000 / updateInterval);
+					lastUpdate = now;
+					that._updateRootSprite();
+					that.emit('frameUpdate', currentFps);
+				}
+			}, 0);
+		}
+		this.emit('setFrameRate', framePerSecond);
+	};
+
+	Canvas.prototype.pause = function () {
+		if (this._frameUpdater) {
+			window.clearInterval(this._frameUpdater);
+			this._frameUpdater = null;
+			this.emit('pause');
+		}
+	};
+
+	Canvas.prototype.resume = function () {
+		if (!this._frameUpdater) {
+			this.setFrameRate(this._framePerSecond);
+			this.emit('resume');
+		}
+	};
+
+	Canvas.prototype.registerRootSprite = function (sprite) {
+		this._rootSprite = sprite;
+	};
 
 	Canvas.prototype.appendTo = function (parentElement) {
 		parentElement.appendChild(this._canvas);
-	};
-
-	Canvas.prototype.setFrameRate = function (framePerSecond) {
-		this._frameRate = Math.max(this._minFrameRate, Math.floor(1000 / framePerSecond));
-		setupFrameUpdater(this, this._frameRate, this._frameUpdater);
-		this.emit('setFrameRate', framePerSecond);
 	};
 
 	Canvas.prototype.addEvent = function (eventName, eventLabel) {
@@ -41,21 +77,17 @@
 	};
 
 	Canvas.prototype.getSize = function () {
-		return this._size;
+		return { width: this._size.w, height: this._size.h };
 	};
 
 	Canvas.prototype.getContext = function (type) {
 		return this._canvas.getContext(type);
 	};
 
-	function setupFrameUpdater(that, frameRate, updater) {
-		if (updater) {
-			window.clearInterval(updater);
-			updater = null;
+	Canvas.prototype._updateRootSprite = function () {
+		if (this._rootSprite) {
+			this._rootSprite._render();
 		}
-		updater = window.setInterval(function () {
-			that.emit('frameUpdate');
-		}, frameRate);
-	}
+	};
 
 }());

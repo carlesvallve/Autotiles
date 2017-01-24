@@ -1,0 +1,76 @@
+<html>
+<head>
+	<script src="../events/EventEmitter.js"></script>
+	<script src="../wui/core/script.js"></script>
+	<script src="../wui/core/Dom/script.js"></script>
+	<script src="../wui/components/View/script.js"></script>
+	<script src="../wui/behaviors/Button/script.js"></script>
+	<script src="../wui/components/Button/script.js"></script>
+	<script src="./script.js"></script>
+	<link rel="stylesheet" type="text/css" href="../wui/components/Button/style.css"></link>
+</head>
+<body>
+
+<script type="text/javascript">
+
+(function (window) {
+	function MainView() {}
+
+	MainView.prototype = new window.wui.components.View();
+
+
+	MainView.prototype.setup = function (options) {
+		this.rootElement.innerText = 'Welcome to this amazing game!';
+
+		var btn = new window.wui.components.Button('Quest!');
+
+		var navTree = this.getNavTree();
+
+		btn.on('tap', function () {
+			navTree.open('quest');
+		});
+
+		this.rootElement.appendChild(btn.rootElement);
+	};
+
+	MainView.prototype.beforepaint = function (params) {};
+
+	MainView.prototype.afterpaint = function (params) {
+		this.getNavTree().clearHistory();
+	};
+
+	MainView.prototype.unpaint = function (params) {};
+
+
+	function QuestView() {}
+
+	QuestView.prototype = new window.wui.components.View();
+
+
+	QuestView.prototype.setup = function (options) {
+		this.rootElement.innerText = 'Quest screen. Exciting!';
+
+		var btn = new window.wui.components.Button('back!');
+
+		var navTree = this.getNavTree();
+
+		btn.on('tap', function () {
+			navTree.back();
+		});
+
+		this.rootElement.appendChild(btn.rootElement);
+	};
+
+
+	var navTree = new window.NavTree(null, { parentElement: document.querySelector('body') });
+
+	navTree.register('main', new MainView());
+	navTree.register('quest', new QuestView());
+	navTree.open('main');
+
+}(window));
+
+</script>
+
+</body>
+</html>

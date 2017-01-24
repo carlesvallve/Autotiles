@@ -1,0 +1,84 @@
+/* base style for the progressbar */
+.wui-progressbar-container-horizontal {
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#1F1F1F), to(#454545), color-stop(.6,#383838));
+	*background: #333;
+}
+
+.wui-progressbar-container-vertical {
+	background: -webkit-gradient(linear, 100% 100%, 0% 100%, from(#1F1F1F), to(#454545), color-stop(.6,#383838));
+	*background: #333;
+}
+
+/* applies rounded corners */
+.wui-progressbar-borders {
+	-webkit-border-radius: 5px;
+}
+
+/* controls the size of progress bar */
+.wui-progressbar-size-horizontal {
+	width: 200px;
+	height: 15px;
+}
+
+.wui-progressbar-size-vertical {
+	width: 15px;
+	height: 200px;
+}
+
+/* global progress bar style */
+.wui-progressbar-progress {
+	position: absolute;
+}
+
+/* individual progress bar * lower the id is the lower the depth of each progress */
+.wui-progressbar-progress-horizontal-id-0 {
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#9CC9FC), to(#336ABD), color-stop(.6,#3345A3));
+	*background: #ccf;
+}
+
+.wui-progressbar-progress-vertical-id-0 {
+	background: -webkit-gradient(linear, 100% 100%, 0% 100%, from(#9CC9FC), to(#336ABD), color-stop(.6,#3345A3));
+	*background: #ccf;
+}
+
+/* styles extra progress layer: -id-1, 2, 3...  */
+.wui-progressbar-progress-horizontal-id-1 {
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#FC9AAA), to(#BD3543), color-stop(.6,#A33131));
+	*background: #fcc;
+}
+
+.wui-progressbar-progress-vertical-id-1 {
+	background: -webkit-gradient(linear, 100% 100%, 0% 100%, from(#FC9AAA), to(#BD3543), color-stop(.6,#A33131));
+	*background: #fcc;
+}
+
+/* progress direction left to right */
+.wui-progressbar-direction-lr {
+	-webkit-transform-origin: 100% 0%;
+}
+
+/* progress direction right to left */
+.wui-progressbar-direction-rl {
+	-webkit-transform-origin: 0% 0%;
+}
+
+/* progress direction top to bottom */
+.wui-progressbar-direction-tb {
+	-webkit-transform-origin: 0% 100%;
+}
+
+/* progress direction bottom to top */
+.wui-progressbar-direction-bt {
+	-webkit-transform-origin: 0% 0%;
+}
+
+/* cover of progressbar */
+.wui-progressbar-cover-horizontal {
+	position: relative;
+	-webkit-box-shadow: 0 0 0 2px #999, inset 0 0 2px 1px #333;
+}
+
+.wui-progressbar-cover-vertical {
+	position: relative;
+	-webkit-box-shadow: 0 0 0 2px #999, inset 0 0 2px 1px #333;
+}

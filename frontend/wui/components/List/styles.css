@@ -1,0 +1,41 @@
+.wui-list-display {
+	margin: 0;
+	padding: 0;
+}
+
+/*  styles orientation of the list */
+.wui-list-display-horizontal {
+
+}
+
+/*  styles orientation of the list */
+.wui-list-display-vertical {
+
+}
+
+/* styles each horizontal list item element */
+.wui-list-display-horizontal .item {
+	display: block;
+	float: left;
+	border: 1px solid #666;
+	margin: 1px;
+	padding: 5px;
+	-webkit-border-radius: 4px;
+}
+
+/* styles each vertical list item element */
+.wui-list-display-vertical .item {
+	display: block;
+	border: 1px solid #666;
+	margin: 1px;
+	padding: 5px;
+	-webkit-border-radius: 4px;
+}
+
+.wui-list-display-horizontal .hide {
+	display: none;
+}
+
+.wui-list-display-vertical .hide {
+	display: none;
+}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="../../../events/EventEmitter.js"></script>
+	<script type="text/javascript" src="../../core/script.js"></script>
+	<script type="text/javascript" src="../../core/Dom/script.js"></script>
+	<script type="text/javascript" src="./script.js"></script>
+</head>
+<body>
+<h1>Chart</h1>
+
+<div id="graph"></div>
+
+<script type="text/javascript">
+
+
+(function () {
+
+function rand(min, max) {
+	var r = Math.floor(Math.random() * (max + 1));
+	if (r < min){
+		r = min;
+	}
+	return r;
+}
+
+function test3(maxX, maxY, length) {
+	var res = [];
+	for (var current = 0; current <= length; current++) {
+		res[current] = calc(maxX, maxY, current);
+	}
+
+	function calc(maxX, maxY, c) {
+		return Math.floor( maxX * ( (c = c / maxY - 1 ) * c * c * c * c + 1 ) );
+	}
+	return res;
+}
+
+function test4(base, current) {
+	return base * (current  * (current - 1) / 2 );
+}
+
+function execFormula() {
+	if (arguments && arguments.length >= 2) {
+		var callerObject = arguments[0];
+		var formula = arguments[1];
+		if (typeof formula !== 'function') {
+			throw new Error('execFormula expects argument 2 to be a function');
+		}
+		// extract arguments for the given formula function
+		var args = [];
+		for (var i = 2, len = arguments.length; i < len; i++) {
+			args.push(arguments[i]);
+		}
+		return formula.apply(callerObject, args);
+	}
+	else {
+		throw new Error('execFormula expects at least argument 1(object/null) and argument 2(function)');
+	}
+}
+
+var graph = document.getElementById('graph');
+var chart = new window.wui.components.Chart(500, 400, { outlineColor: '#000', gridColor: '#efefef', gridNumX: 50, gridNumY: 40 });
+var test = [];
+test[0] = 0;
+test[1] = 40;
+test[2] = 50;
+test[3] = 78;
+test[4] = 89;
+test[5] = 93;
+test[6] = 101;
+test[7] = 135;
+test[8] = 174;
+test[9] = 203;
+test[10] = 400;
+chart.setData('#99f', test);
+chart.setData('#f99', test3(1000, 500, 50));
+var len = 50;
+var test2 = [];
+for (var i = 0; i <= len; i++) {
+	test2.push( rand(0, 200) + i );
+}
+chart.setData('#9c9', test2);
+
+chart.setData('#cc6', function () {
+	var len = 50;
+	var base = 1;
+	var res = [];
+	for (var i = 0; i < len; i++) {
+		res.push(test4(base, i));
+	}
+	return res;
+}());
+
+graph.appendChild(chart.rootElement);
+
+}());
+
+
+</script>
+
+</body>
+</html>

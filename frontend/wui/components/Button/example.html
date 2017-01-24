@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../events/EventEmitter.js"></script>
+	<script src="../../core/script.js"></script>
+	<script src="../../core/Dom/script.js"></script>
+	<script src="../../behaviors/button/script.js"></script>
+	<script src="./script.js"></script>
+	<link rel="stylesheet" type="text/css" href="./style.css"></link>
+	<style type="text/css">
+		body { -webkit-user-select: none; -webkit-user-drag: none; }
+		input, textarea { -webkit-user-select: text; }
+	</style>
+</head>
+<body>
+
+<h1>Example: Button component</h1>
+
+<form>
+	<input type="text" name="caption" value="Click me!">
+	<input type="submit" value="set">
+</form>
+
+<div id="workspace"></div>
+<div id="state"></div>
+
+<script type="text/javascript">
+
+(function () {
+	var workspace = document.getElementById('workspace');
+	var state = document.getElementById('state');
+	var form = document.forms[0];
+	var btn;
+
+	form.onsubmit = function () {
+		if (btn) {
+			btn.destroy();
+		}
+
+		btn = new window.wui.components.Button(form.caption.value);
+
+		btn.on('tapstart', function () {
+			state.innerText = 'tapping begins';
+		});
+
+		btn.on('tapcancel', function () {
+			state.innerText = 'tapping cancelled';
+		});
+
+		btn.on('tap', function () {
+			state.innerText = 'tap success!';
+		});
+
+		workspace.appendChild(btn.rootElement);
+
+		return false;
+	};
+}());
+
+</script>
+
+</body>
+</html>

@@ -1,161 +1,184 @@
-(function (window) {
+(function () {
 
-	/***
-	 * Constructor
-	 * This behavior assumes the target object is a sprite
-	 */
-	function Button() {
-		this.isDown = false;
+	var spriteList = [];
+	var spriteLen = 0;
+
+	/*
+	* @sprite (Sprite)
+	* @params (Object) swipeDistance: Number, tapInterval: Number (in seconds)
+	*/
+	function button(sprite, params) {
+		if (spriteList.indexOf(sprite) === -1) {
+			spriteList.push(sprite);
+			spriteLen += 1;
+			sprite.__enable = true;
+			sprite.__tapParams = params || {};
+		}
 	}
 
-	Button.prototype = new EventEmitter();
-	window.wuic.behaviors.Button = Button;
+	function setupButtonStart(event) {
+		var isDown = true;
+		initEvent('tapstart', event, isDown);
+	}
 
-	/**
-	 * Creates a button object
-	 * @sprite (Object) EventEmitter with properties of following x, y, width, height, and functions gx() and gy()
-	 */
-	Button.prototype.register = function (sprite) {
-		if (sprite.__enable !== undefined) {
-			// sprite has already been registered
-			return false;
-		}
+	function setupButtonEnd(event) {
+		var isDown = false;
+		initEvent('tapend', event, isDown);
+	}
 
-		// add private flag
-		sprite.__enable = true;
+	function setupButtonMove(event) {
+		initEvent('tapmove', event, null);
+	}
 
-		// get mouse relative position inside the sprite
-		function getMousePos(positions) {
-			return  { x: positions.x - sprite.gx(), y: positions.y - sprite.gy() }
-		}
+	function setupButtonCancel(event) {
+		var isDown = false;
+		initEvent('tapcancel', event, isDown);
+	}
 
-		// enable-disable the button behavior when opening-closing the button sprite's view
-		var that =  this;
-		if(sprite.view) {
-			sprite.__enable = false;
-			sprite.view.on('open', function() {
-				setTimeout(function() {
-					that.enable(sprite);
-				}, 0);
-			});
-			sprite.view.on('close', function() {
-				that.disable(sprite);
-			});
-		}
-
-		// set up event listeners
-		this.on('tapstart', function (event, positions) {
-			if (sprite.__enable) {
-				var pos = getMousePos(positions);
-				if (insideBounds(pos, sprite.width, sprite.height)) {
-					sprite.emit('tapstart', event, pos);
-					// set startPos for swiping
-					this.startPos = pos;
-				}
-			}
-		});
-		this.on('tapend', function (event, positions) {
-			if (sprite.__enable) {
-				var pos = getMousePos(positions);
-				if (insideBounds(pos, sprite.width, sprite.height)) {
-					sprite.emit('tapend', event, pos);
-				} else {
-					sprite.emit('tapendoutside', event, pos);
-				}
-			}
-		});
-		this.on('tapcancel', function (event, positions) {
-			if (sprite.__enable) {
-				var pos = getMousePos(positions);
-				if (insideBounds(pos, sprite.width, sprite.height)) {
-					sprite.emit('tapcancel', event, pos);
-				}
-			}
-		});
-		this.on('tapmove', function (event, positions) {
-			if (sprite.__enable) {
-				var pos = getMousePos(positions);
-				if (insideBounds(pos, sprite.width, sprite.height)) {
-					sprite.emit('tapmove', event, pos);
-					// swipe
-					var vec = { x: pos.x - this.startPos.x, y: pos.y - this.startPos.y }
-					var dist = Math.sqrt(vec.x * vec.x + vec.y * vec.y);
-					if(dist > 5) {
-						sprite.emit('swipe', event, this.startPos, vec, dist);
-					}
-
-
-				}
-			}
-		});
-		return true;
-	};
-
-	Button.prototype.enable = function (sprite) {
-		if (sprite.__enable === undefined || sprite.__enable) {
+	function buttonEnable(sprite) {
+		if (spriteList.indexOf(sprite) === -1) {
 			return false;
 		}
 		sprite.__enable = true;
-		return true;
-	};
+	}
 
-	Button.prototype.disable = function (sprite) {
-		if (sprite.__enable === undefined || sprite.__enable === false) {
+	function buttonDisable(sprite) {
+		if (spriteList.indexOf(sprite) === -1) {
 			return false;
 		}
 		sprite.__enable = false;
-		return true;
-	};
+	}
 
-	/***
-	 * Register this function to an event such as touchstart
-	 */
-	Button.prototype.tapstart = function (event, positions) {
-		if (!this.isDown) {
-			this.isDown = true;
-			this.emit('tapstart', event, positions);
+	window.wuic.behaviors.button = button;
+	window.wuic.behaviors.setupButtonStart = setupButtonStart;
+	window.wuic.behaviors.setupButtonEnd = setupButtonEnd;
+	window.wuic.behaviors.setupButtonMove = setupButtonMove;
+	window.wuic.behaviors.setupButtonCancel = setupButtonCancel;
+	window.wuic.behaviors.buttonEnable = buttonEnable;
+	window.wuic.behaviors.buttonDisable = buttonDisable;
+
+	function initEvent(eventName, event, isDown) {
+		var touchPos = getTouchPos(event);
+		for (var i = 0; i < spriteLen; i++) {
+			triggerEvent(eventName, spriteList[i], event, touchPos, isDown);
 		}
-	};
+	}
 
-	/***
-	 * Register this functiin to an event such as touchend
-	 */
-	Button.prototype.tapend = function (event, positions) {
-		if (this.isDown) {
-			this.isDown = false;
-			this.emit('tapend', event, positions);
+	function getTouchPos(event) {
+		var x = 0;
+		var y = 0;
+		if (event.changedTouches) {
+			x = event.changedTouches[0].pageX;
+			y = event.changedTouches[0].pageY;
+		} else {
+			x = event.offsetX;
+			y = event.offsetY;
 		}
-	};
 
-	/***
-	 * Register this function to an event such as touchcancel
-	 */
-	Button.prototype.tapcancel = function (event, positions) {
-		if (this.isDown) {
-			this.isDown = false;
-			this.emit('tapcancel', event, positions);
-		}
-	};
+		return { x: x, y: y };
+	}
 
-	/***
-	 * Register this function to an event such as touchmove
-	 */
-	Button.prototype.tapmove = function (event, positions) {
-		if (this.isDown) {
-			this.emit('tapmove', event, positions);
-		}
-	};
-
-	/***
-	 * Check if given relative mouse position is inside sprite bounds
-	 */
-	function insideBounds(pos, width, height) {
-		if (pos) {
-			if (pos.x >= 0 && pos.x <= width && pos.y >= 0 && pos.y <= height) {
+	function isInBounds(sprite, positions) {
+		var localCoordinate = sprite._getLocalCoordinate(positions.x, positions.y);
+		positions.localX = localCoordinate.x;
+		positions.localY = localCoordinate.y;
+		if (localCoordinate.x >= 0 && localCoordinate.x <= sprite.width) {
+			if (localCoordinate.y >= 0 && localCoordinate.y <= sprite.height) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-}(window));
+	function triggerEvent(eventName, sprite, event, positions, isDown) {
+		if (isEnabled(sprite) && sprite.isVisible() && isInBounds(sprite, positions)) {
+			if (isDown !== null) {
+				sprite.__isDown = isDown;
+			}
+			emitEvent(eventName, sprite, event, positions);
+		} else if (sprite.__isDown && eventName === 'tapend') {
+			delete sprite.__isDown;
+			sprite.emit('tapendoutside', event, positions);
+		} else if (sprite.__isDown && eventName === 'tapmove') {
+			sprite.emit('tapmoveoutside', event, positions);
+		}
+	}
+
+	function isEnabled(sprite) {
+		var enabled = sprite.__enable || false;
+		if (!enabled) {
+			return false;
+		}
+		var parent = sprite.getParent();
+		while (parent && enabled) {
+			enabled = (parent.__enable !== undefined) || true;
+			parent = parent.getParent();
+		}
+		return enabled;
+	}
+
+	function emitEvent(eventName, sprite, event, positions) {
+		var emit = false;
+		// evaluate the event
+		switch (eventName) {
+			case 'tapstart':
+				if (sprite.__isDown && !sprite.__tapLock) {
+					// remember start positions
+					sprite.__tapAnchors = positions;
+					emit = true;
+					// lock tap with tapInterval
+					var tapInterval = (sprite.__tapParams.tapInterval === undefined) ? 0.5 : sprite.__tapParams.tapInterval;
+					if (tapInterval) {
+						sprite.__tapLock = true;
+						window.setTimeout(function () {
+							delete sprite.__tapLock;
+						}, tapInterval * 1000);
+					}
+				}
+				break;
+			case 'tapmove':
+				if (sprite.__isDown) {
+					emit = true;
+					// detect swipe
+					detectSwipe(sprite, event, positions);
+				}
+				break;
+			case 'tapend':
+				if (!sprite.__isDown) {
+					emit = true;
+					// reset anchor positions
+					delete sprite.__tapAnchors;
+				}
+				break;
+			case 'tapcancel':
+				if (sprite.__isDown) {
+					emit = true;
+					delete sprite.__tapAnchors;
+				}
+				break;
+		}
+		if (emit) {
+			sprite.emit(eventName, event, positions);
+		}
+	}
+
+	function detectSwipe(sprite, event, positions) {
+		if (!sprite.__tapAnchors) {
+			return;
+		}
+		var threshHold = (sprite.__tapParams && sprite.__tapParams.swipeDistance) || 5;
+		var distX = positions.x - sprite.__tapAnchors.x;
+		var distY = positions.y - sprite.__tapAnchors.y;
+		var dist = Math.sqrt(distX * distX + distY * distY);
+		if (dist > threshHold) {
+			var vector = {
+				x: distX,
+				y: distY,
+				localX: positions.localX - sprite.__tapAnchors.localX,
+				localY: positions.localY - sprite.__tapAnchors.localY
+			};
+			sprite.emit('swipe', event, { startPositions: sprite.__tapAnchors, distance: dist, vector: vector });
+		}
+	}
+
+}());

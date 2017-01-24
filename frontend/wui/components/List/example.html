@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script type="text/javascript" src="../../../events/EventEmitter.js"></script>
+	<script type="text/javascript" src="../../core/script.js"></script>
+	<script type="text/javascript" src="../../core/Dom/script.js"></script>
+	<script type="text/javascript" src="./script.js"></script>
+	<link type="text/css" rel="stylesheet" href="./styles.css"></link>
+</head>
+<body>
+<h1>List</h1>
+
+<button onclick="change();">Change Orientation</button>
+<div id="container"></div>
+<br />
+<div style="clear: both;">
+<button onclick="add();">[+]Add</button>
+</div>
+
+<script type="text/javascript">
+
+var ori = 'horizontal';
+var container = document.getElementById('container');
+var list = new window.wui.components.List(container);
+var data = [ {title: "Title 1", body: "Body 1"}, { title: "Title 2", body: "Body 2" } ];
+var pos = data.length;
+list.createListItem = function (index, itemElement, itemData) {
+	itemElement.innerHTML = "title:" + itemData.title + "<br /> body: " + itemData.body + '<br /><button onclick="remove(' + index + ');">[-] Remove</button>';
+};
+list.create(data);
+
+function add() {
+	pos += 1;
+	var item = { title: "Title " + (pos), body: "Body " + (pos) };
+	data.push(item);
+	list.update(data);
+}
+
+function remove(index) {
+	index = Number(index);
+	var tmp = [];
+	for (var i = 0; i < data.length; i++) {
+		if (i !== index) {
+			tmp.push(data[i]);
+		}
+	}
+	data = tmp;
+	list.update(data);
+}
+
+function change() {
+	list[ori]();
+	if (ori === 'horizontal') {
+		ori = 'vertical';
+	}
+	else {
+		ori = 'horizontal';
+	}
+}
+
+</script>
+</body>
+</html>
